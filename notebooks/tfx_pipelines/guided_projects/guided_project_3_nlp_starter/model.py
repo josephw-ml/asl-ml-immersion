@@ -60,14 +60,13 @@ def _input_fn(file_pattern, data_accessor, tf_transform_output, batch_size=200):
 
 
 def _load_hub_module_layer():
-    hub_module = KerasLayer(
+    return KerasLayer(
         HUB_URL,
         output_shape=[HUB_DIM],
         input_shape=[],
         dtype=tf.string,
         trainable=True,
     )
-    return hub_module
 
 
 def _build_keras_model():

@@ -3,6 +3,7 @@ Send sensor data to Cloud Pub/Sub in small groups, simulating real-time
 behavior
 """
 
+
 import argparse
 import logging
 import random
@@ -39,7 +40,7 @@ if __name__ == "__main__":
 
     while True:
         num_trips = random.randint(10, 60)
-        for i in range(num_trips):
+        for _ in range(num_trips):
             publisher.publish(topic_name, b"taxi_ride")
         logging.info("Publishing: %s", time.ctime())
         time.sleep(5)

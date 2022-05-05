@@ -72,16 +72,13 @@ def create_pipeline(
 ) -> pipeline.Pipeline:
     """Implements the chicago taxi pipeline with TFX."""
 
-    components = []
-
     # Brings data into the pipeline or otherwise joins/converts training data.
     # example_gen = CsvExampleGen(input=external_input(data_path))
     # TODO(step 7): (Optional) Uncomment here to use BigQuery as a data source.
     example_gen = big_query_example_gen_component.BigQueryExampleGen(
         query=query
     )
-    components.append(example_gen)
-
+    components = [example_gen]
     # Computes statistics over data for visualization and example validation.
     statistics_gen = StatisticsGen(examples=example_gen.outputs["examples"])
     # TODO(step 5): Uncomment here to add StatisticsGen to the pipeline.
@@ -125,17 +122,16 @@ def create_pipeline(
         ),
     }
     if ai_platform_training_args is not None:
-        trainer_args.update(
-            {
-                "custom_executor_spec": executor_spec.ExecutorClassSpec(
-                    ai_platform_trainer_executor.GenericExecutor
-                ),
-                "custom_config": {
-                    # pylint: disable-next=line-too-long
-                    ai_platform_trainer_executor.TRAINING_ARGS_KEY: ai_platform_training_args,
-                },
-            }
-        )
+        trainer_args |= {
+            "custom_executor_spec": executor_spec.ExecutorClassSpec(
+                ai_platform_trainer_executor.GenericExecutor
+            ),
+            "custom_config": {
+                # pylint: disable-next=line-too-long
+                ai_platform_trainer_executor.TRAINING_ARGS_KEY: ai_platform_training_args,
+            },
+        }
+
     trainer = Trainer(**trainer_args)
     # TODO(step 6): Uncomment here to add Trainer to the pipeline.
     components.append(trainer)
@@ -196,17 +192,16 @@ def create_pipeline(
         ),
     }
     if ai_platform_serving_args is not None:
-        pusher_args.update(
-            {
-                "custom_executor_spec": executor_spec.ExecutorClassSpec(
-                    ai_platform_pusher_executor.Executor
-                ),
-                "custom_config": {
-                    # pylint: disable-next=line-too-long
-                    ai_platform_pusher_executor.SERVING_ARGS_KEY: ai_platform_serving_args
-                },
-            }
-        )
+        pusher_args |= {
+            "custom_executor_spec": executor_spec.ExecutorClassSpec(
+                ai_platform_pusher_executor.Executor
+            ),
+            "custom_config": {
+                # pylint: disable-next=line-too-long
+                ai_platform_pusher_executor.SERVING_ARGS_KEY: ai_platform_serving_args
+            },
+        }
+
     pusher = Pusher(**pusher_args)  # pylint: disable=unused-variable
     # TODO(step 6): Uncomment here to add Pusher to the pipeline.
     components.append(pusher)

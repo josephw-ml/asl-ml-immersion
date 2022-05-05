@@ -17,6 +17,7 @@
 This file defines environments for a TFX taxi pipeline.
 """
 
+
 import os  # pylint: disable=unused-import
 
 # TODO(b/149347293): Move more TFX CLI flags into python configuration.
@@ -42,7 +43,7 @@ except ImportError:
 # when running a pipeline with Kubeflow Pipeline on GCP or when running a job
 # using Dataflow. Default is '<gcp_project_name>-kubeflowpipelines-default'.
 # This bucket is created automatically when you deploy KFP from marketplace.
-GCS_BUCKET_NAME = GOOGLE_CLOUD_PROJECT + "-kubeflowpipelines-default"
+GCS_BUCKET_NAME = f"{GOOGLE_CLOUD_PROJECT}-kubeflowpipelines-default"
 
 # TODO(step 8,step 9): (Optional) Set your region to use GCP services including
 #                      BigQuery, Dataflow and Cloud AI Platform.
@@ -63,9 +64,10 @@ EVAL_ACCURACY_THRESHOLD = 0.6
 # TODO(step 7): (Optional) Uncomment here to provide GCP related configs for
 #               BigQuery.
 BIG_QUERY_WITH_DIRECT_RUNNER_BEAM_PIPELINE_ARGS = [
-    "--project=" + GOOGLE_CLOUD_PROJECT,
+    f"--project={GOOGLE_CLOUD_PROJECT}",
     "--temp_location=" + os.path.join("gs://", GCS_BUCKET_NAME, "tmp"),
 ]
+
 
 # The rate at which to sample rows from the Chicago Taxi dataset using BigQuery.
 # The full taxi dataset is > 120M record.  In the interest of resource
@@ -110,15 +112,15 @@ BIG_QUERY_QUERY = f"""
 #                    scaling bottleneck.
 # TODO(step 8): (Optional) Uncomment below to use Dataflow.
 DATAFLOW_BEAM_PIPELINE_ARGS = [
-    "--project=" + GOOGLE_CLOUD_PROJECT,
+    f"--project={GOOGLE_CLOUD_PROJECT}",
     "--runner=DataflowRunner",
     "--temp_location=" + os.path.join("gs://", GCS_BUCKET_NAME, "tmp"),
-    "--region=" + GOOGLE_CLOUD_REGION,
-    # Temporary overrides of defaults.
+    f"--region={GOOGLE_CLOUD_REGION}",
     "--disk_size_gb=50",
     "--experiments=shuffle_mode=auto",
     "--machine_type=n1-standard-8",
 ]
+
 
 # A dict which contains the training job parameters to be passed to Google
 # Cloud AI Platform. For the full set of parameters supported by Google Cloud AI
@@ -128,17 +130,11 @@ DATAFLOW_BEAM_PIPELINE_ARGS = [
 GCP_AI_PLATFORM_TRAINING_ARGS = {
     "project": GOOGLE_CLOUD_PROJECT,
     "region": GOOGLE_CLOUD_REGION,
-    # Starting from TFX 0.14, training on AI Platform uses custom containers:
-    # https://cloud.google.com/ml-engine/docs/containers-overview
-    # You can specify a custom container here. If not specified, TFX will use
-    # a public container image matching the installed version of TFX.
-    # TODO(step 9): (Optional) Set your container name below.
     "masterConfig": {
-        "imageUri": "gcr.io/" + GOOGLE_CLOUD_PROJECT + "/tfx-pipeline"
+        "imageUri": f"gcr.io/{GOOGLE_CLOUD_PROJECT}/tfx-pipeline"
     },
-    # Note that if you do specify a custom container, ensure the entrypoint
-    # calls into TFX's run_executor script (tfx/scripts/run_executor.py)
 }
+
 
 # A dict which contains the serving job parameters to be passed to Google
 # Cloud AI Platform. For the full set of parameters supported by Google Cloud AI

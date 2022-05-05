@@ -85,7 +85,7 @@ def _input_fn(
       A dataset that contains (features, indices) tuple where features is a
         dictionary of Tensors, and indices is a single Tensor of label indices.
     """
-    dataset = data_accessor.tf_dataset_factory(
+    return data_accessor.tf_dataset_factory(
         file_pattern,
         dataset_options.TensorFlowDatasetOptions(
             batch_size=batch_size,
@@ -93,8 +93,6 @@ def _input_fn(
         ),
         tf_transform_output.transformed_metadata.schema,
     )
-
-    return dataset
 
 
 def _get_hyperparameters() -> kerastuner.HyperParameters:
@@ -172,21 +170,18 @@ def _build_keras_model(
         for categorical_column in categorical_columns
     ]
 
-    input_layers.update(
-        {
-            column.categorical_column.key: tf.keras.layers.Input(
-                name=column.categorical_column.key, shape=(), dtype=tf.int32
-            )
-            for column in wide_columns
-        }
-    )
+    input_layers |= {
+        column.categorical_column.key: tf.keras.layers.Input(
+            name=column.categorical_column.key, shape=(), dtype=tf.int32
+        )
+        for column in wide_columns
+    }
+
 
     # Build Keras model using hparams.
     deep = tf.keras.layers.DenseFeatures(deep_columns)(input_layers)
     for n in range(int(hparams.get("n_layers"))):
-        deep = tf.keras.layers.Dense(
-            units=hparams.get("n_units_" + str(n + 1))
-        )(deep)
+        deep = tf.keras.layers.Dense(units=hparams.get(f"n_units_{str(n + 1)}"))(deep)
 
     wide = tf.keras.layers.DenseFeatures(wide_columns)(input_layers)
 
@@ -358,4 +353,4 @@ def run_fn(fn_args: TrainerFnArgs):
     model.save(
         fn_args.serving_model_dir, save_format="tf", signatures=signatures
     )
-    _copy_tensorboard_logs(LOCAL_LOG_DIR, fn_args.serving_model_dir + "/logs")
+    _copy_tensorboard_logs(LOCAL_LOG_DIR, f"{fn_args.serving_model_dir}/logs")

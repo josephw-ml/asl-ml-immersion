@@ -70,7 +70,7 @@ def main():
         eval_data = util.load_dataset(args.eval_path, training=False)
         image_model = model.build_model(args.job_dir, args.hub_path)
 
-    model_history = model.train_and_evaluate(
+    return model.train_and_evaluate(
         image_model,
         args.epochs,
         args.steps_per_epoch,
@@ -78,8 +78,6 @@ def main():
         eval_data,
         args.job_dir,
     )
-
-    return model_history
 
 
 if __name__ == "__main__":

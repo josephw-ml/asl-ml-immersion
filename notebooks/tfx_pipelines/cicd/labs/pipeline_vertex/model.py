@@ -74,7 +74,7 @@ def _input_fn(
       A dataset that contains (features, indices) tuple where features is a
         dictionary of Tensors, and indices is a single Tensor of label indices.
     """
-    dataset = data_accessor.tf_dataset_factory(
+    return data_accessor.tf_dataset_factory(
         file_pattern,
         dataset_options.TensorFlowDatasetOptions(
             batch_size=batch_size,
@@ -83,18 +83,15 @@ def _input_fn(
         tf_transform_output.transformed_metadata.schema,
     )
 
-    return dataset
-
 
 def _get_hyperparameters():
     """Returns hyperparameters"""
-    hparams = {
+    return {
         "learning_rate": 1e-3,
         "n_layers": 2,
         "n_units_1": 8,
         "n_units_2": 8,
     }
-    return hparams
 
 
 def _build_keras_model(hparams, tf_transform_output):
@@ -135,20 +132,17 @@ def _build_keras_model(hparams, tf_transform_output):
         for categorical_column in categorical_columns
     ]
 
-    input_layers.update(
-        {
-            column.categorical_column.key: tf.keras.layers.Input(
-                name=column.categorical_column.key, shape=(), dtype=tf.int32
-            )
-            for column in wide_columns
-        }
-    )
+    input_layers |= {
+        column.categorical_column.key: tf.keras.layers.Input(
+            name=column.categorical_column.key, shape=(), dtype=tf.int32
+        )
+        for column in wide_columns
+    }
+
 
     deep = tf.keras.layers.DenseFeatures(deep_columns)(input_layers)
     for n in range(int(hparams.get("n_layers"))):
-        deep = tf.keras.layers.Dense(
-            units=hparams.get("n_units_" + str(n + 1))
-        )(deep)
+        deep = tf.keras.layers.Dense(units=hparams.get(f"n_units_{str(n + 1)}"))(deep)
 
     wide = tf.keras.layers.DenseFeatures(wide_columns)(input_layers)
 

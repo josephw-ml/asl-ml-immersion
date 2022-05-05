@@ -171,12 +171,10 @@ def create_pipeline(
         pusher,
     ]
 
-    tfx_pipeline = pipeline.Pipeline(
+    return pipeline.Pipeline(
         pipeline_name=pipeline_name,
         pipeline_root=pipeline_root,
         components=components,
         beam_pipeline_args=beam_pipeline_args,
         enable_cache=Config.ENABLE_CACHE,
     )
-
-    return tfx_pipeline
