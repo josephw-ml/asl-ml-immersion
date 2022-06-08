@@ -78,12 +78,12 @@ LABEL_KEY = "big_tipper"
 
 def transformed_name(key: str) -> str:
     """Generate the name of the transformed feature from original name."""
-    return key + "_xf"
+    return f"{key}_xf"
 
 
 def vocabulary_name(key: str) -> str:
     """Generate the name of the vocabulary feature from original name."""
-    return key + "_vocab"
+    return f"{key}_vocab"
 
 
 def transformed_names(keys: List[str]) -> List[str]:

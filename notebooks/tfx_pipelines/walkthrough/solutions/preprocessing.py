@@ -42,13 +42,13 @@ def _fill_in_missing(x):
 def preprocessing_fn(inputs):
     """Preprocesses Covertype Dataset."""
 
-    outputs = {}
-
-    # Scale numerical features.
-    for key in features.NUMERIC_FEATURE_KEYS:
-        outputs[features.transformed_name(key)] = tft.scale_to_z_score(
+    outputs = {
+        features.transformed_name(key): tft.scale_to_z_score(
             _fill_in_missing(inputs[key])
         )
+        for key in features.NUMERIC_FEATURE_KEYS
+    }
+
 
     # Generate vocabularies and maps categorical features.
     for key in features.CATEGORICAL_FEATURE_KEYS:

@@ -163,13 +163,10 @@ def build_dnn_model(nbuckets, nnsize, lr, string_cols):
     inputs = {
         colname: layers.Input(name=colname, shape=(), dtype="float32")
         for colname in numeric_cols
+    } | {
+        colname: layers.Input(name=colname, shape=(), dtype="string")
+        for colname in string_cols
     }
-    inputs.update(
-        {
-            colname: layers.Input(name=colname, shape=(), dtype="string")
-            for colname in string_cols
-        }
-    )
 
     # transforms
     transformed, feature_columns = transform(inputs, numeric_cols, nbuckets)

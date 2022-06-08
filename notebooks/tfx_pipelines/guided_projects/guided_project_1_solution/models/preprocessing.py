@@ -56,12 +56,12 @@ def preprocessing_fn(inputs):
     Returns:
       Map from string feature key to transformed feature operations.
     """
-    outputs = {}
-    for key in features.DENSE_FLOAT_FEATURE_KEYS:
-        # Preserve this feature as a dense float, setting nan's to the mean.
-        outputs[features.transformed_name(key)] = tft.scale_to_z_score(
+    outputs = {
+        features.transformed_name(key): tft.scale_to_z_score(
             _fill_in_missing(inputs[key])
         )
+        for key in features.DENSE_FLOAT_FEATURE_KEYS
+    }
 
     for key in features.VOCAB_FEATURE_KEYS:
         # Build a vocabulary for this feature.

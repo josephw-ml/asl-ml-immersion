@@ -118,14 +118,13 @@ def _build_keras_model(hidden_units, learning_rate):
         for categorical_column in categorical_columns
     ]
 
-    model = _wide_and_deep_classifier(
+    return _wide_and_deep_classifier(
         # TODO(b/140320729) Replace with premade wide_and_deep keras model
         wide_columns=indicator_column,
         deep_columns=real_valued_columns,
         dnn_hidden_units=hidden_units,
         learning_rate=learning_rate,
     )
-    return model
 
 
 def _wide_and_deep_classifier(
@@ -143,16 +142,16 @@ def _wide_and_deep_classifier(
     Returns:
       A Wide and Deep Keras model
     """
-    # Keras needs the feature definitions at compile time.
-    # TODO(b/139081439): Automate generation of input layers from FeatureColumn.
-    input_layers = {
-        colname: tf.keras.layers.Input(name=colname, shape=(), dtype=tf.float32)
-        for colname in features.transformed_names(
-            features.DENSE_FLOAT_FEATURE_KEYS
-        )
-    }
-    input_layers.update(
+    input_layers = (
         {
+            colname: tf.keras.layers.Input(
+                name=colname, shape=(), dtype=tf.float32
+            )
+            for colname in features.transformed_names(
+                features.DENSE_FLOAT_FEATURE_KEYS
+            )
+        }
+        | {
             colname: tf.keras.layers.Input(
                 name=colname, shape=(), dtype="int32"
             )
@@ -160,9 +159,7 @@ def _wide_and_deep_classifier(
                 features.VOCAB_FEATURE_KEYS
             )
         }
-    )
-    input_layers.update(
-        {
+        | {
             colname: tf.keras.layers.Input(
                 name=colname, shape=(), dtype="int32"
             )
@@ -170,9 +167,7 @@ def _wide_and_deep_classifier(
                 features.BUCKET_FEATURE_KEYS
             )
         }
-    )
-    input_layers.update(
-        {
+        | {
             colname: tf.keras.layers.Input(
                 name=colname, shape=(), dtype="int32"
             )

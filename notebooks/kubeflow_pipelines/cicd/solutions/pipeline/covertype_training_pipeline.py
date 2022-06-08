@@ -73,11 +73,9 @@ def generate_sampling_query(source_table_name, num_lots, lots):
          WHERE
          MOD(ABS(FARM_FINGERPRINT(TO_JSON_STRING(cover))), {{ num_lots }}) IN ({{ lots }})
          """
-    query = Template(sampling_query_template).render(
+    return Template(sampling_query_template).render(
         source_table=source_table_name, num_lots=num_lots, lots=str(lots)[1:-1]
     )
-
-    return query
 
 
 # Create component factories
